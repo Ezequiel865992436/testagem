@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IzaVendas</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET ===== */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+body{background:#f2f2f2;color:#333}
+
+/* ===== HEADER ===== */
+header{background:#fff;padding:15px 20px;display:flex;align-items:center;justify-content:space-between;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);position:sticky;top:0;z-index:1000}
+.logo{font-size:1.8em;font-weight:bold;color:#ff6b6b}
+.menu{display:flex;gap:20px;align-items:center}
+.menu a{text-decoration:none;color:#333;font-weight:bold;transition:.3s}
+.menu a:hover{color:#ff6b6b}
+.hamburger{display:none;flex-direction:column;cursor:pointer;width:25px;height:20px;justify-content:space-between}
+.hamburger div{width:100%;height:3px;background:#333;transition:.4s}
+.hamburger.active div:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.hamburger.active div:nth-child(2){opacity:0}
+.hamburger.active div:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+/* ===== SEARCH ===== */
+.search-bar{display:flex;justify-content:center;margin:20px}
+.search-bar input{padding:10px;width:60%;max-width:400px;border:1px solid #ccc;border-radius:8px}
+
+/* ===== PRODUTOS ===== */
+.products{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;padding:0 20px 50px 20px}
+.product{background:#fff;padding:15px;border-radius:10px;text-align:center;
+box-shadow:0 2px 5px rgba(0,0,0,.1);transition:.3s}
+.product:hover{transform:translateY(-5px)}
+.product img{max-width:100%;border-radius:8px}
+.product h3{margin:10px 0;font-size:1.1em}
+.product p{margin:5px 0;font-weight:bold;color:#ff6b6b}
+.product button{padding:8px 12px;border:none;background:#ff6b6b;color:#fff;font-weight:bold;
+border-radius:5px;cursor:pointer;margin-top:10px;transition:.3s}
+.product button:hover{background:#e55a5a}
+
+/* ===== REVIEWS ===== */
+.reviews{background:#fff;margin:40px 20px;padding:20px;border-radius:10px;box-shadow:0 2px 5px rgba(0,0,0,.1)}
+.reviews h2{margin-bottom:15px;color:#ff6b6b}
+.review-form{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.review-form input,.review-form textarea{padding:10px;border:1px solid #ccc;border-radius:5px}
+.review-form button{background:#ff6b6b;color:#fff;border:none;padding:10px;font-weight:bold;
+border-radius:5px;cursor:pointer}
+.review-form button:hover{background:#e55a5a}
+.review-list .review{border-bottom:1px solid #eee;padding:10px 0}
+.review-list .review:last-child{border:none}
+.review img{max-width:80px;border-radius:5px;margin-top:5px}
+
+/* ===== CARRINHO ===== */
+.cart{position:fixed;right:0;top:0;width:300px;max-width:90%;height:100%;background:#fff;
+box-shadow:-2px 0 5px rgba(0,0,0,.2);padding:20px;transform:translateX(100%);
+transition:.3s;display:flex;flex-direction:column;z-index:1001}
+.cart.open{transform:translateX(0)}
+.cart h2{margin-bottom:15px}
+.cart-item{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.cart-item div{display:flex;flex-direction:column}
+.cart-item button{background:#ff6b6b;color:#fff;border:none;border-radius:3px;padding:3px 6px;
+cursor:pointer;margin:2px}
+.cart-total{margin-top:auto;font-weight:bold;font-size:1.2em}
+.checkout-btn{margin-top:10px;padding:10px;background:#25d366;color:#fff;border:none;
+border-radius:5px;cursor:pointer;font-weight:bold}
+
+/* ===== FOOTER ===== */
+footer{background:#333;color:#fff;text-align:center;padding:20px;margin-top:40px}
+footer .social{display:flex;justify-content:center;gap:20px;margin-top:10px}
+footer a{color:#fff;text-decoration:none;font-size:1.2em;transition:.3s}
+footer a:hover{color:#ff6b6b}
+
+/* ===== RESPONSIVO ===== */
+@media(max-width:1200px){.products{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:900px){.products{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.products{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:400px){.products{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .menu{display:none;flex-direction:column;background:#fff;position:absolute;top:60px;right:0;width:200px;
+  box-shadow:0 2px 5px rgba(0,0,0,.2);padding:15px}
+  .menu.show{display:flex}
+  .hamburger{display:flex}
+}
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">IzaVendas</div>
+    <nav class="menu">
+        <a href="#">Home</a>
+        <a href="#">Produtos</a>
+        <a href="#">Categorias</a>
+        <a href="#" id="cartBtn">🛒 Carrinho</a>
+    </nav>
+    <div class="hamburger" id="hamburger">
+        <div></div><div></div><div></div>
+    </div>
+</header>
+
+<div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Pesquisar produtos...">
+</div>
+
+<div class="products" id="products"></div>
+
+<!-- ===== REVIEWS ===== -->
+<section class="reviews">
+  <h2>Comentários de Clientes</h2>
+  <form class="review-form" id="reviewForm">
+    <input type="text" id="reviewName" placeholder="Seu nome" required>
+    <textarea id="reviewText" rows="3" placeholder="Escreva seu comentário..." required></textarea>
+    <input type="file" id="reviewImage" accept="image/*">
+    <button type="submit">Enviar comentário</button>
+  </form>
+  <div class="review-list" id="reviewList"></div>
+</section>
+
+<div class="cart" id="cart">
+    <h2>Carrinho</h2>
+    <div class="cart-items"></div>
+    <div class="cart-total">Total: 0 </div>
+    <button class="checkout-btn" id="checkout">Finalizar pelo WhatsApp</button>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <p>&copy; 2025 IzaVendas- Todos os direitos reservados</p>
+  <div class="social">
+    <a href="https://www.facebook.com/airinho.aires ">📘 Facebook</a>
+    <a href="#">📸 Instagram</a>
+    <a href="865992436">📞 Telefone</a>
+    <a href="#">📲 Telegram</a>
+    <a href="#">🎵 TikTok</a>
+  </div>
+</footer>
+
+<script>
+// ===== MENU HAMBURGER =====
+const hamburger=document.getElementById('hamburger');
+const menu=document.querySelector('.menu');
+hamburger.addEventListener('click',()=>{menu.classList.toggle('show');hamburger.classList.toggle('active');});
+
+// ===== PRODUTOS =====
+const productsData=[
+    {name:"Ezequiel",price:50,img:"https://via.placeholder.com/200"},
+    {name:"Ezequiel",price:10,img:"https://via.placeholder.com/200"},
+    {name:"Smartphone",price:20,img:"https://via.placeholder.com/200"},
+    {name:"Apartamento",price:35000,img:"https://via.placeholder.com/200"},
+    {name:"Pizza",price:25,img:"https://via.placeholder.com/200"},
+    {name:"Tênis Esportivo",price:200,img:"https://via.placeholder.com/200"},
+    {name:"Notebook",price:3500,img:"https://via.placeholder.com/200"},
+    {name:"Relógio",price:300,img:"https://via.placeholder.com/200"},
+    {name:"Geladeira",price:2500,img:"https://via.placeholder.com/200"},
+    {name:"TV 50\"",price:2800,img:"https://via.placeholder.com/200"},
+    {name:"Sofá",price:1500,img:"https://via.placeholder.com/200"},
+    {name:"Bicicleta",price:900,img:"https://via.placeholder.com/200"},
+    {name:"Livro",price:40,img:"https://via.placeholder.com/200"},
+    {name:"Headset Gamer",price:350,img:"https://via.placeholder.com/200"},
+    {name:"Cadeira Gamer",price:1100,img:"https://via.placeholder.com/200"},
+    {name:"Smartphone",price:20,img:"https://via.placeholder.com/200"},
+    {name:"Apartamento",price:35000,img:"https://via.placeholder.com/200"},
+    {name:"Churrasqueira",price:800,img:"https://via.placeholder.com/200"}
+    
+];
+const productsContainer=document.getElementById('products');
+function renderProducts(list){
+    productsContainer.innerHTML='';
+    list.forEach(p=>{
+        const div=document.createElement('div');
+        div.classList.add('product');
+        div.innerHTML=`
+            <img src="${p.img}" alt="${p.name}">
+            <h3>${p.name}</h3>
+            <p>R$${p.price.toFixed(2)}</p>
+            <button data-name="${p.name}" data-price="${p.price}">Adicionar</button>
+        `;
+        productsContainer.appendChild(div);
+    });
+}
+renderProducts(productsData);
+
+// ===== CARRINHO =====
+const cartBtn=document.getElementById('cartBtn');
+const cart=document.getElementById('cart');
+cartBtn.addEventListener('click',()=>{cart.classList.toggle('open');});
+
+let cartItems=[];
+const cartItemsContainer=document.querySelector('.cart-items');
+const cartTotal=document.querySelector('.cart-total');
+
+document.addEventListener('click',(e)=>{
+    if(e.target.tagName==='BUTTON'&&e.target.dataset.name){
+        const name=e.target.dataset.name;
+        const price=parseFloat(e.target.dataset.price);
+        const item=cartItems.find(i=>i.name===name);
+        if(item){item.quantity++;}else{cartItems.push({name,price,quantity:1});}
+        renderCart();
+        cart.classList.add('open');
+    }
+});
+function renderCart(){
+    cartItemsContainer.innerHTML='';
+    let total=0;
+    cartItems.forEach((item,index)=>{
+        total+=item.price*item.quantity;
+        const div=document.createElement('div');
+        div.classList.add('cart-item');
+        div.innerHTML=`
+            <div><strong>${item.name}</strong><span>${item.price} x ${item.quantity}</span></div>
+            <div>
+                <button onclick="changeQuantity(${index},1)">+</button>
+                <button onclick="changeQuantity(${index},-1)">-</button>
+            </div>
+        `;
+        cartItemsContainer.appendChild(div);
+    });
+    cartTotal.innerText=`Total: ${total.toFixed(2)} MZN`;
+}
+window.changeQuantity=(index,amount)=>{
+    cartItems[index].quantity+=amount;
+    if(cartItems[index].quantity<=0){cartItems.splice(index,1);}
+    renderCart();
+};
+
+// ===== FINALIZAR WHATSAPP =====
+document.getElementById('checkout').addEventListener('click',()=>{
+    if(cartItems.length===0){alert("Seu carrinho está vazio!");return;}
+    let message="Olá! Gostaria de comprar:\n";
+    cartItems.forEach(item=>{message+=`${item.name} - ${item.quantity} x ${item.price}\n`;});
+    message+=`Total: ${cartItems.reduce((a,i)=>a+i.price*i.quantity,0).toFixed(2)}`;
+    const phone="258865992436"; //  número
+    const url=`https://wa.me/${258865992436}?text=${encodeURIComponent(message)}`;
+    window.open(url,"_blank");
+});
+
+// ===== FILTRO PESQUISA =====
+const searchInput=document.getElementById('searchInput');
+searchInput.addEventListener('input',()=>{
+    const value=searchInput.value.toLowerCase();
+    const filtered=productsData.filter(p=>p.name.toLowerCase().includes(value));
+    renderProducts(filtered);
+});
+
+// ===== REVIEWS =====
+const reviewForm=document.getElementById('reviewForm');
+const reviewList=document.getElementById('reviewList');
+reviewForm.addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const name=document.getElementById('reviewName').value;
+  const text=document.getElementById('reviewText').value;
+  const imageInput=document.getElementById('reviewImage');
+  const div=document.createElement('div');
+  div.classList.add('review');
+  div.innerHTML=`<strong>${name}</strong><p>${text}</p>`;
+  
+  if(imageInput.files[0]){
+    const img=document.createElement('img');
+    img.src=URL.createObjectURL(imageInput.files[0]);
+    div.appendChild(img);
+  }
+  reviewList.prepend(div);
+  reviewForm.reset();
+});
+</script>
+
+</body>
+<
+j
